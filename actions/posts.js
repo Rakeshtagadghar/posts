@@ -1,6 +1,9 @@
 "use server";
 
-const { redirect } = require("next/navigation");
+import { uploadImage } from "@/lib/cloudinary";
+import { storePost, updatePostLikeStatus } from "@/lib/posts";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function createPost(prevState, formData) {
   "use server";
@@ -30,11 +33,18 @@ export async function createPost(prevState, formData) {
 
   console.log(title, image, content);
   try {
-     imageUrl = await uploadImage(image);
+    imageUrl = await uploadImage(image);
   } catch (error) {
-    throw new Error("Failed to upload image");
+    console.error(error);
+    return { errors: ["Failed to upload image, please try again."] };
   }
 
   await storePost({ title, content, imageUrl, userId: 1 });
+  revalidatePath("/feed");
   redirect("/feed");
+}
+
+export async function togglePostLikeStatus(postId) {
+  await updatePostLikeStatus(postId, 2);
+  revalidatePath("/feed");
 }
