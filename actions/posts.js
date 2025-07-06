@@ -26,10 +26,11 @@ export async function createPost(prevState, formData) {
   if (errors.length > 0) {
     return { errors };
   }
+  let imageUrl = "";
 
   console.log(title, image, content);
   try {
-    const imageUrl = await uploadImage(image);
+     imageUrl = await uploadImage(image);
   } catch (error) {
     throw new Error("Failed to upload image");
   }
